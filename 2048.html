@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+	<title>doudou</title>
+	<style type="text/css">
+		*{
+			margin: 0px;
+			padding: 0px;
+		}
+		html,body{
+			width: 100%;
+			height: 100%;
+			font-size: 24px;
+			position: relative;
+			background-color: #a40;
+		}
+		ul{
+			list-style: none;
+		}
+		.container{
+			width: 323px;
+			height: 323px;
+			position: absolute;
+			top: 50px;
+			left: 50%;
+			margin-left: -160px;
+			border: 1px solid #666;
+		}
+		ul li{
+			width: 80px;
+			height: 80px;
+			float: left;
+			color: #ff0;
+			border-right:1px solid #ccc;
+			border-bottom:1px solid #ccc;
+			background-color: #c60;
+			font-size: 40px;
+			text-align: center;
+			line-height: 80px;
+			box-shadow: 0px 0px 20px #cc0 inset;
+			text-shadow: #cc0 3px  3px 0.6;
+		}
+		ul li:nth-child(4),ul li:nth-child(8),ul li:nth-child(12){
+			border-right:0;
+			border-bottom:1px solid #aaa;
+		}
+		ul li:nth-child(13),ul li:nth-child(14),ul li:nth-child(15){
+			border-bottom:0px;
+		}
+		ul li:nth-child(16){
+			border-right:0;
+			border-bottom:0;
+		}
+		.result,.restart{
+			position: absolute;
+			width: 120px;
+			height: 60px;
+			bottom: 50px;
+			line-height: 60px;
+			font-size: 25px;
+			text-align: center;
+			right: 5px;
+			box-shadow: 0px 0px 10px #fff inset;
+			background-color: #c60; 
+			color: #ff0;
+		}
+		.restart{
+			width: 60px;
+			right: 130px;
+			color: #ff0;
+		}
+		.icon-restart{
+			width: 30px;
+			height: 30px;
+			position: relative;
+			border-radius: 50%;
+			border: 5px solid #ff0;
+			margin: 10px auto 0;
+			border-top-color: #c60;
+		}
+		.icon-restart:before{
+			content: "";
+			position: absolute;
+			width: 0;
+			height: 0;
+			left: 0px;
+			top: -13px;
+			border: 10px solid #ff0;
+			border-right-color: transparent;
+			border-top-color: transparent;
+			border-left-color: transparent;
+			/*border-bottom-color: #ff0;*/
+			transform: rotate(45deg);
+		}
+
+	</style>
+</head>
+<body>
+	<div class="container">
+		<ul>
+			<li></li><li></li><li></li><li></li>
+			<li></li><li></li><li></li><li></li>
+			<li></li><li></li><li></li><li></li>
+			<li></li><li></li><li></li><li></li>
+		</ul>
+	</div>
+	<div class="result" id="result">
+		0
+	</div>
+	<div class="restart" id="restart">
+		<div class="icon-restart">
+			
+		</div>
+	</div>
+
+
+	<script type="text/javascript" src="jquery-1.12.2.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			var emptyBlockArr = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+			var tempEmpty = [];
+			var direactLine = {
+				"leftDirc" : [[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]],
+				"topDirc" : [[0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15]],
+				"rightDirc" : [[3,2,1,0],[7,6,5,4],[11,10,9,8],[15,14,13,12]],
+				"downDirc" : [[12,8,4,0],[13,9,5,1],[14,10,6,2],[15,11,7,3]]
+			};
+			var addResult = 0;
+			var blockValue = [2,2,2,4];
+			var $list = $('ul li');
+			// 触摸事件的坐标
+			var touchStartX = 0;
+			var touchStartY = 0;
+			var touchEndX = 0;
+			var touchEndY = 0;
+			function init(){
+				// 每次随机产生两个数字，记录第一个随机出现数字的方块
+				var randomNum1 = emptyBlockArr[parseInt(emptyBlockArr.length*Math.random())]; 
+				$list.eq(randomNum1).html(blockValue[Math.round(Math.random())*3]);
+				emptyBlockArr = deleteValueInArray(randomNum1, emptyBlockArr);
+				// 记录第二个随机出现数字的方块
+				var randomNum2 = emptyBlockArr[parseInt(emptyBlockArr.length*Math.random())];
+				emptyBlockArr = deleteValueInArray(randomNum2, emptyBlockArr);
+				$list.eq(randomNum2).html(blockValue[Math.round(Math.random())*3]);
+			}
+			init();
+			function appendNum(){
+				var index = 0;
+				if(emptyBlockArr.length == tempEmpty.length){
+					for(var i = 0; i < emptyBlockArr.length; i++){
+						for(var j = 0; j < tempEmpty.length; j++){
+							if(emptyBlockArr[i] == tempEmpty[j]){
+								index++;
+							}
+						}
+					}
+					if(index == emptyBlockArr.length){
+						return;
+					}
+					// 每次随机产生两个数字，记录第一个随机出现数字的方块
+					var randomNum1 = emptyBlockArr[parseInt(emptyBlockArr.length*Math.random())]; 
+					$list.eq(randomNum1).html(blockValue[Math.round(Math.random())*3]);
+					emptyBlockArr = deleteValueInArray(randomNum1, emptyBlockArr);
+				}
+					
+			}
+			// 判断游戏有没有死掉
+			function isEnd(){
+				var flag = 0;
+				if(emptyBlockArr.length == 0){
+					for(var index in direactLine){
+						for(var j = 0; j < direactLine[index].length; j++){
+							for(var m = 0; m < direactLine[index][j].length-1; m++){
+								if(eval($list.eq(direactLine[index][j][m]).html()) == eval($list.eq(direactLine[index][j][m+1]).html()))
+								{
+									return false;
+								}
+							}
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+			// appendNum();
+
+					// 判断当前设备是移动设备还是电脑设备
+			 function browserRedirect() {
+			      var sUserAgent = navigator.userAgent.toLowerCase();
+			      var bIsIpad = sUserAgent.match(/ipad/i) == "ipad";
+			      var bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os";
+			      var bIsMidp = sUserAgent.match(/midp/i) == "midp";
+			      var bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4";
+			      var bIsUc = sUserAgent.match(/ucweb/i) == "ucweb";
+			      var bIsAndroid = sUserAgent.match(/android/i) == "android";
+			      var bIsCE = sUserAgent.match(/windows ce/i) == "windows ce";
+			      var bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile";
+			      var value = bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM;
+			      if (value) {
+			        return true; // 如果当前设备是手机，则返回true
+			      } else {
+			        return false; // 如果当前设备是PC，则返回true
+			      }
+	   		 }
+	   		 function derectMove(direct){
+	   		 	if(isEnd()){
+	   		 		alert("游戏结束");
+	   		 		return;
+	   		 	}
+	   		 	var directDirc = direct + 'Dirc';
+	   		 	tempEmpty = emptyBlockArr;
+	   		 	emptyBlockArr = [];
+				for(var i = 0; i < direactLine[directDirc].length; i++){
+					var tempArr = [];
+					for(var j = 0; j < direactLine[directDirc][i].length; j ++){
+						if($list.eq(direactLine[directDirc][i][j]).html() != ""){
+							if(tempArr[tempArr.length-1] == $list.eq(direactLine[directDirc][i][j]).html()){
+								addResult += tempArr[tempArr.length-1];
+								tempArr[tempArr.length-1] += tempArr[tempArr.length-1];
+							}
+							else{
+								tempArr.push(eval($list.eq(direactLine[directDirc][i][j]).html()));
+							}
+						}
+					}
+					for(var t = 0; t < tempArr.length; t++){
+						$list.eq(direactLine[directDirc][i][t]).html(tempArr[t]);
+					}
+					for(var m = tempArr.length; m < direactLine[directDirc][i].length; m++){
+						emptyBlockArr.push(direactLine[directDirc][i][m]);
+						$list.eq(direactLine[directDirc][i][m]).html("");
+					}
+					
+				}
+
+	   		 }	
+			// 从数组中删除一个元素之后返回整个元素
+			function deleteValueInArray(value, arr){
+				for(var i = 0; i < arr.length; i++){
+					if(value == arr[i]){
+						arr.splice(i, i+1);
+					}
+				}
+				return arr;
+			}
+	   		 // 触摸手势
+	   		 var EventUtil = {
+				   getEvent: function (event) {
+				       return event ? event : window.event;
+				   },
+				   addHandler: function (element, type, handler) {
+				       if (element.addEventListener) {
+				           element.addEventListener(type, handler, false);
+				       } else if (element.attachEvent) {
+				           element.attachEvent("on" + type, handler);
+				       } else {
+				       		element["on" + type] = handler;
+				       }
+				   }
+				};
+	   		 function handleTouchEvent(event){
+	   		 	if(isEnd()){
+	   		 		alert("游戏结束");
+	   		 		return;
+	   		 	}
+   		 		switch(event.type){
+   		 			case "touchstart" : 
+   		 				touchStartX = event.touches[0].clientX;
+   		 				touchStartY = event.touches[0].clientY;
+   		 				break;
+   		 			case "touchend" : 
+   		 				touchEndX = event.changedTouches[0].clientX;
+   		 				touchEndY = event.changedTouches[0].clientY;
+   		 				if(Math.abs(touchEndY-touchStartY) > Math.abs(touchEndX-touchStartX)){
+   		 					if(touchEndY > touchStartY){
+   		 						// 向下移动
+   		 						derectMove("down");
+   		 					}
+   		 					else{
+   		 						derectMove("top");
+   		 					}
+   		 				}
+   		 				else{
+   		 					if(touchEndX > touchStartX){
+   		 						// 向右移动
+   		 						derectMove("right");
+   		 					}
+   		 					else{
+   		 						derectMove("left");
+   		 					}
+   		 				}
+   		 				appendNum();
+						$(".result").html(addResult);
+						console.log()
+   		 				break;
+   		 			case "touchmove" : 
+   		 				event.preventDefault();//阻止滑动
+   		 				break;
+   		 		}
+   		 	}
+   		 	// 判断当前游戏是否终止
+   		 	// 移动端和PC端分别执行想对应的事件
+	   		 if(browserRedirect()){
+	   		 	EventUtil.addHandler(document, "touchstart",handleTouchEvent);
+				EventUtil.addHandler(document, "touchend",handleTouchEvent);
+				EventUtil.addHandler(document, "touchmove",handleTouchEvent);
+
+	   		 }
+	   		 else{
+	   		 	$(document).keydown(function(event){
+					var codeNum = event.keyCode;
+					switch(codeNum){
+						// 左移动
+						case 37 :
+							derectMove("left");
+							appendNum();
+							break;
+							// 上移动
+						case 38 :
+							derectMove("top");
+							appendNum();
+							break;
+							// 右移动
+						case 39 :
+							derectMove("right");
+							appendNum();
+							break;
+							// 下移动
+						case 40 :
+							derectMove("down");
+							appendNum();
+							break;
+						default :
+							break;
+					}
+					$(".result").html(addResult);
+				})
+	   		 } 
+	   		 // 重新开始游戏
+	   		 $("#restart").on("click", function(){
+	   		 	$list.html("");
+	   		 	$(".result").html(0);
+	   		 	emptyBlockArr = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+	   		 	tempEmpty = [];
+	   		 	init();
+	   		 })
+		})
+	</script>
+</body>
+</html>
