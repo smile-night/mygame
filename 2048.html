@@ -159,11 +159,11 @@
 					if(index == emptyBlockArr.length){
 						return;
 					}
-					// 每次随机产生两个数字，记录第一个随机出现数字的方块
-					var randomNum1 = emptyBlockArr[parseInt(emptyBlockArr.length*Math.random())]; 
-					$list.eq(randomNum1).html(blockValue[Math.round(Math.random())*3]);
-					emptyBlockArr = deleteValueInArray(randomNum1, emptyBlockArr);
 				}
+				// 每次随机产生两个数字，记录第一个随机出现数字的方块
+				var randomNum1 = emptyBlockArr[parseInt(emptyBlockArr.length*Math.random())]; 
+				$list.eq(randomNum1).html(blockValue[Math.round(Math.random())*3]);
+				emptyBlockArr = deleteValueInArray(randomNum1, emptyBlockArr);
 					
 			}
 			// 判断游戏有没有死掉
