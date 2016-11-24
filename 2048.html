@@ -98,7 +98,7 @@
 	</style>
 </head>
 <body>
-	<div class="container">
+	<div class="container" id="container">
 		<ul>
 			<li></li><li></li><li></li><li></li>
 			<li></li><li></li><li></li><li></li>
@@ -119,6 +119,7 @@
 	<script type="text/javascript" src="jquery-1.12.2.js"></script>
 	<script type="text/javascript">
 		$(function(){
+			var container = document.getElementById("container");
 			var emptyBlockArr = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 			var tempEmpty = [];
 			var direactLine = {
@@ -303,9 +304,9 @@
    		 	// 判断当前游戏是否终止
    		 	// 移动端和PC端分别执行想对应的事件
 	   		 if(browserRedirect()){
-	   		 	EventUtil.addHandler(document, "touchstart",handleTouchEvent);
-				EventUtil.addHandler(document, "touchend",handleTouchEvent);
-				EventUtil.addHandler(document, "touchmove",handleTouchEvent);
+	   		 	EventUtil.addHandler(container, "touchstart",handleTouchEvent);
+				EventUtil.addHandler(container, "touchend",handleTouchEvent);
+				EventUtil.addHandler(container, "touchmove",handleTouchEvent);
 
 	   		 }
 	   		 else{
